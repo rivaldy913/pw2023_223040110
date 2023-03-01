@@ -12,10 +12,10 @@ $npm="10"
 <body>
     <p>
     Aku adalah <?php echo $npm ?><br>
-    Jika aku dikali 5, maka aku akan menjadi <?php echo $npm * 5 ?><br>
-    Jika aku dibagi 2, maka aku akan menjadi <?php echo 50 / 2 ?><br>
-    Jika aku ditambah 75, maka aku akan menjadi <?php echo 25 + 75 ?><br>
-    Jika aku dikurang 20, maka aku akan menjadi <?php echo 100 - 20 ?>
+    Jika aku dikali 5, maka aku sekarang menjadi <?php echo $npm * 5 ?><br>
+    Jika aku dibagi 2, maka aku sekarang menjadi <?php echo 50 / 2 ?><br>
+    Jika aku ditambah 75, maka aku sekarang menjadi <?php echo 25 + 75 ?><br>
+    Jika aku dikurang 20, maka aku sekarang menjadi <?php echo 100 - 20 ?>
     </p>
 </body>
 </html>
