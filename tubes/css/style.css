@@ -1,0 +1,26 @@
+.jumbotron {
+  padding-top: 8rem;
+  background-color: #ffffff;
+}
+
+#beranda {
+  background-color: #ffffff;
+  padding-top: 4rem;
+}
+
+#perangkat {
+  padding-bottom: 6rem;
+}
+
+.Profil {
+  background-color: #ffffff;
+  padding-top: 4rem;
+}
+
+#contact {
+  padding-top: 4rem;
+}
+
+.footer {
+  padding-top: 2rem;
+}
