@@ -28,6 +28,8 @@
             &copy; 2023. <b>MyTechnology.</b> All Rights Reserved.
         </div>
     </div>
+
+    <script src="script.js"></script>
     
 </body>
 </html>

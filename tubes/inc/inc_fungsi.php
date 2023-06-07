@@ -212,3 +212,7 @@ function kirim_email($email_penerima, $nama_penerima, $judul_email, $isi_email){
         return "gagal: {$mail->ErrorInfo}";
     }
 }
+
+
+
+
