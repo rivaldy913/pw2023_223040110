@@ -1,5 +1,8 @@
 <?php include("inc_header.php") ?>
 <?php
+
+require "../vendor/autoload.php";
+
 $sukses = "";
 $katakunci = (isset($_GET['katakunci'])) ? $_GET['katakunci'] : "";
 if (isset($_GET['op'])) {
@@ -20,28 +23,111 @@ if ($op == 'delete') {
         $sukses     = "Berhasil hapus data";
     }
 }
+
+
+// generate PDF
+if (isset($_GET['generate_pdf'])) {
+    $mpdf = new \Mpdf\Mpdf();
+
+    ob_start();
 ?>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th class="col-1">#</th>
+            <th class="col-2">Foto</th>
+            <th>Nama</th>
+            <th class="col-2">Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        $sqltambahan = "";
+        $per_halaman = 5;
+        if ($katakunci != '') {
+            $array_katakunci = explode(" ", $katakunci);
+            for ($x = 0; $x < count($array_katakunci); $x++) {
+                $sqlcari[] = "(nama like '%" . $array_katakunci[$x] . "%' or isi like '%" . $array_katakunci[$x] . "%')";
+            }
+            $sqltambahan    = " where " . implode(" or ", $sqlcari);
+        }
+        $sql1   = "select * from partners $sqltambahan";
+        $page   = isset($_GET['page'])?(int)$_GET['page']:1;
+        $mulai  = ($page > 1) ? ($page * $per_halaman) - $per_halaman : 0;
+        $q1     = mysqli_query($koneksi,$sql1);
+        $total  = mysqli_num_rows($q1);
+        $pages  = ceil($total / $per_halaman);
+        $nomor  = $mulai + 1;
+        $sql1   = $sql1." order by id desc limit $mulai,$per_halaman";
+
+        $q1     = mysqli_query($koneksi, $sql1);
+      
+        while ($r1 = mysqli_fetch_array($q1)) {
+        ?>
+        <tr>
+            <td><?php echo $nomor++ ?></td>
+            <td><img src="../gambar/<?php echo partners_foto($r1['id'])?>" style="max-height:100px;max-width:100px" />
+            </td>
+            <td><?php echo $r1['nama'] ?></td>
+            <td>
+                <a href="partners_input.php?id=<?php echo $r1['id']?>">
+                    <span class="badge bg-warning text-dark">Edit</span>
+                </a>
+
+                <a href="partners.php?op=delete&id=<?php echo $r1['id'] ?>"
+                    onclick="return confirm('Apakah yakin mau hapus data bro?')">
+                    <span class="badge bg-danger">Delete</span>
+                </a>
+            </td>
+        </tr>
+        <?php
+        }
+        ?>
+
+    </tbody>
+</table>
+
+<?php 
+$html = ob_end_clean();
+
+$mpdf->SetHeader('MyTech');
+$mpdf->WriteHTML($html);
+$mpdf->Output();
+
+exit();
+}
+?>
+<!-- Pdf Reporting -->
+
+
+
+
+<!-- Pages -->
 <h1>Halaman Admin Partners</h1>
-<p>
-    <a href="partners_input.php">
-        <input type="button" class="btn btn-primary" value="Buat Partners Baru" />
-    </a>
-</p>
+
 <?php
 if ($sukses) {
 ?>
-    <div class="alert alert-primary" role="alert">
-        <?php echo $sukses ?>
-    </div>
+<div class="alert alert-primary" role="alert">
+    <?php echo $sukses ?>
+</div>
 <?php
 }
 ?>
 <form class="row g-3" method="get">
     <div class="col-auto">
-        <input type="text" class="form-control" placeholder="Masukkan Kata Kunci" name="katakunci" value="<?php echo $katakunci ?>" autocomplete="off" />
+        <input type="text" class="form-control" placeholder="Masukkan Kata Kunci" name="katakunci"
+            value="<?php echo $katakunci ?>" autocomplete="off" />
     </div>
     <div class="col-auto">
         <input type="submit" name="cari" value="Cari Tulisan" class="btn btn-secondary" />
+    </div>
+    <div class="mt2">
+        <a href="partners_input.php">
+            <input type="button" class="btn btn-primary" value="Buat Partners Baru" />
+        </a>
+        <a href="?generate_pdf" type="submit" class="btn btn-danger">Print PDF</a>
     </div>
 </form>
 <table class="table table-striped">
@@ -77,20 +163,22 @@ if ($sukses) {
       
         while ($r1 = mysqli_fetch_array($q1)) {
         ?>
-            <tr>
-                <td><?php echo $nomor++ ?></td>
-                <td><img src="../gambar/<?php echo partners_foto($r1['id'])?>" style="max-height:100px;max-width:100px"/></td>
-                <td><?php echo $r1['nama'] ?></td>
-                <td>
-                    <a href="partners_input.php?id=<?php echo $r1['id']?>">
-                        <span class="badge bg-warning text-dark">Edit</span>
-                    </a>
+        <tr>
+            <td><?php echo $nomor++ ?></td>
+            <td><img src="../gambar/<?php echo partners_foto($r1['id'])?>" style="max-height:100px;max-width:100px" />
+            </td>
+            <td><?php echo $r1['nama'] ?></td>
+            <td>
+                <a href="partners_input.php?id=<?php echo $r1['id']?>">
+                    <span class="badge bg-warning text-dark">Edit</span>
+                </a>
 
-                    <a href="partners.php?op=delete&id=<?php echo $r1['id'] ?>" onclick="return confirm('Apakah yakin mau hapus data bro?')">
-                        <span class="badge bg-danger">Delete</span>
-                    </a>
-                </td>
-            </tr>
+                <a href="partners.php?op=delete&id=<?php echo $r1['id'] ?>"
+                    onclick="return confirm('Apakah yakin mau hapus data bro?')">
+                    <span class="badge bg-danger">Delete</span>
+                </a>
+            </td>
+        </tr>
         <?php
         }
         ?>
@@ -105,12 +193,14 @@ if ($sukses) {
 
         for($i=1; $i <= $pages; $i++){
             ?>
-            <li class="page-item">
-                <a class="page-link" href="partners.php?katakunci=<?php echo $katakunci?>&cari=<?php echo $cari?>&page=<?php echo $i ?>"><?php echo $i ?></a>
-            </li>
-            <?php
+        <li class="page-item">
+            <a class="page-link"
+                href="partners.php?katakunci=<?php echo $katakunci?>&cari=<?php echo $cari?>&page=<?php echo $i ?>"><?php echo $i ?></a>
+        </li>
+        <?php
         }
         ?>
     </ul>
 </nav>
+
 <?php include("inc_footer.php") ?>
